@@ -31,3 +31,9 @@ echo "test" | mail -s "hello" your_email@outlook.com
 ```bash
 cat /var/log/mail.log 
 ```
+
+## 脚本目录
+
+脚本默认地址：`/root/ipmitool/`
+
+FansControl日志地址：`/root/ipmitool/log`
