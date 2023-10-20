@@ -38,17 +38,75 @@ install_postfix() {
 # 配置Postfix
 configure_postfix() {
     echo "正在配置Postfix..."
-    sudo sed -i "s/myhostname =.*/myhostname = localhost/" /etc/postfix/main.cf
-    sudo sed -i "s/mydestination =.*/mydestination = localhost/" /etc/postfix/main.cf
-    sudo sed -i "s/inet_interfaces =.*/inet_interfaces = loopback-only/" /etc/postfix/main.cf
-    sudo sed -i "s/#relayhost =.*/relayhost = [$SMTP_SERVER]:$SMTP_PORT/" /etc/postfix/main.cf
-    sudo sed -i "s/#smtp_sasl_auth_enable =.*/smtp_sasl_auth_enable = yes/" /etc/postfix/main.cf
-    sudo sed -i "s/#smtp_sasl_password_maps =.*/smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd/" /etc/postfix/main.cf
-    sudo sed -i "s/#smtp_sasl_security_options =.*/smtp_sasl_security_options = noanonymous/" /etc/postfix/main.cf
 
+    # 1. 设置 myhostname
+    if ! grep -q "myhostname = " /etc/postfix/main.cf; then
+        echo "myhostname = localhost" | sudo tee -a /etc/postfix/main.cf > /dev/null
+    else
+        sudo sed -i "s|myhostname =.*|myhostname = localhost|" /etc/postfix/main.cf
+    fi
+
+    # 2. 设置 mydestination
+    if ! grep -q "mydestination = " /etc/postfix/main.cf; then
+        echo "mydestination = localhost" | sudo tee -a /etc/postfix/main.cf > /dev/null
+    else
+        sudo sed -i "s|mydestination =.*|mydestination = localhost|" /etc/postfix/main.cf
+    fi
+
+    # 3. 设置 inet_interfaces
+    if ! grep -q "inet_interfaces = " /etc/postfix/main.cf; then
+        echo "inet_interfaces = loopback-only" | sudo tee -a /etc/postfix/main.cf > /dev/null
+    else
+        sudo sed -i "s|inet_interfaces =.*|inet_interfaces = loopback-only|" /etc/postfix/main.cf
+    fi
+
+    # 4. 设置 relayhost
+    if ! grep -q "relayhost = " /etc/postfix/main.cf; then
+        echo "relayhost = [$SMTP_SERVER]:$SMTP_PORT" | sudo tee -a /etc/postfix/main.cf > /dev/null
+    else
+        sudo sed -i "s|#relayhost =.*|relayhost = [$SMTP_SERVER]:$SMTP_PORT|" /etc/postfix/main.cf
+    fi
+
+    # 5. 启用 smtp_sasl_auth_enable
+    if ! grep -q "smtp_sasl_auth_enable = " /etc/postfix/main.cf; then
+        echo "smtp_sasl_auth_enable = yes" | sudo tee -a /etc/postfix/main.cf > /dev/null
+    else
+        sudo sed -i "s|#smtp_sasl_auth_enable =.*|smtp_sasl_auth_enable = yes|" /etc/postfix/main.cf
+    fi
+
+    # 6. 设置 smtp_sasl_password_maps
+    if ! grep -q "smtp_sasl_password_maps = " /etc/postfix/main.cf; then
+        echo "smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd" | sudo tee -a /etc/postfix/main.cf > /dev/null
+    else
+        sudo sed -i "s|#smtp_sasl_password_maps =.*|smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd|" /etc/postfix/main.cf
+    fi
+
+    # 7. 设置 smtp_generic_maps
+    if ! grep -q "smtp_generic_maps = " /etc/postfix/main.cf; then
+        echo "smtp_generic_maps = hash:/etc/postfix/generic" | sudo tee -a /etc/postfix/main.cf > /dev/null
+    else
+        sudo sed -i "s|smtp_generic_maps =.*|smtp_generic_maps = hash:/etc/postfix/generic|" /etc/postfix/main.cf
+    fi
+
+    # 8. 设置 smtp_sasl_security_options
+    if ! grep -q "smtp_sasl_security_options = " /etc/postfix/main.cf; then
+        echo "smtp_sasl_security_options = noanonymous" | sudo tee -a /etc/postfix/main.cf > /dev/null
+    else
+        sudo sed -i "s|#smtp_sasl_security_options =.*|smtp_sasl_security_options = noanonymous|" /etc/postfix/main.cf
+    fi
+
+    # 9. 设置 sasl_passwd
     echo "[$SMTP_SERVER]:$SMTP_PORT    $SMTP_USERNAME:$SMTP_PASSWORD" | sudo tee /etc/postfix/sasl_passwd > /dev/null
     sudo postmap /etc/postfix/sasl_passwd
     sudo chmod 600 /etc/postfix/sasl_passwd
+
+    # 10. 添加发件人映射
+    hostname=$(hostname)
+    current_user=$(whoami)
+    sender_mapping="$current_user@$hostname $EMAIL"
+    echo "$sender_mapping" | sudo tee -a /etc/postfix/generic > /dev/null
+    sudo postmap /etc/postfix/generic
+
     sudo systemctl restart postfix
 }
 
