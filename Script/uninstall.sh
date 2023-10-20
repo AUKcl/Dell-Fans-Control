@@ -1,11 +1,7 @@
-#!/bin/bash
-
-# 卸载戴尔风扇控制脚本和相关文件
-uninstall_fans_control() {
-    echo "正在卸载戴尔风扇控制脚本..."
-    sudo update-rc.d -f FansControl.sh remove
-    sudo rm /etc/init.d/FansControl.sh
-    sudo rm -rf /root/ipmitool/
+# 卸载mailutils
+uninstall_mailutils() {
+    echo "正在卸载mailutils..."
+    sudo apt-get remove -y mailutils
 }
 
 # 卸载ipmitool
@@ -22,11 +18,20 @@ uninstall_postfix() {
     sudo rm /etc/postfix/sasl_passwd.db
 }
 
+# 删除戴尔风扇控制脚本和相关文件
+remove_fans_control() {
+    echo "正在删除戴尔风扇控制脚本和相关文件..."
+    sudo update-rc.d -f FansControl.sh remove
+    sudo rm /etc/init.d/FansControl.sh
+    sudo rm -rf /root/ipmitool/
+}
+
 # 执行一键卸载脚本
 uninstall_script() {
-    uninstall_fans_control
+    uninstall_mailutils
     uninstall_ipmitool
     uninstall_postfix
+    remove_fans_control
 
     echo "卸载完成！戴尔风扇控制脚本和相关组件已被移除。"
 }
