@@ -1,3 +1,29 @@
+#    AutoBangumi-OneClickScrip
+#    One-click deployment of the ipmitool on Linux, and automatic control of Dell server fan speed, with email notification of the execution result.
+#    Copyright (C) <2023>  <AUKcl>
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#    
+#    AUKcl's email:kaixuan135@outloook.com
+
+echo -e "${GREEN}欢迎使用 Dell-Fans-Control 一键部署脚本${PLAIN}"
+echo -e "${GREEN}本程序将自动为您部署程序${PLAIN}"
+echo -e "${GREEN}如果您遇到问题可以在这里寻找答案： ${PLAIN}"
+echo -e "${YELLOW}https://github.com/AUKcl/Dell-Fans-Control${PLAIN}"
+
+read -p "按下回车以继续..."
+
 # 下载戴尔风扇控制脚本
 download_fans_control_script() {
     echo "正在下载戴尔风扇控制脚本..."

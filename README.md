@@ -37,3 +37,6 @@ cat /var/log/mail.log
 脚本默认地址：`/root/ipmitool/`
 
 FansControl日志地址：`/root/ipmitool/log`
+
+## 许可证
+GPLv3 © [AUKcl](LICENSE)
