@@ -19,16 +19,11 @@
 #    
 #    AUKcl's email:kaixuan135@outloook.com
 
+# 导入配置文件
+source /root/ipmitool/config/config.cfg
+
 # 获取当前时间的年月日、时分秒格式
 CURRENT_TIME=$(date +"%Y%m%d_%H%M%S")
-
-# 设置IPMI连接参数
-IP=<目标服务器IP地址>
-USERNAME=<IPMI用户名>
-PASSWORD=<IPMI密码>
-
-# 设置通知邮箱地址
-EMAIL=<通知邮箱地址>
 
 # 指定日志文件的目录
 LOG_DIR="/root/ipmitool/log"
@@ -42,11 +37,11 @@ LOG_FILE="$LOG_DIR/logfile_$CURRENT_TIME.log"
 # 开启日志
 exec > >(tee -a $LOG_FILE) 2>&1
 
-echo "戴尔风扇控制脚本运行中..." 
+echo "戴尔服务器风扇控制脚本运行中..." 
 
 # 发送通知邮件函数
 send_notification() {
-SUBJECT="戴尔服务器风扇控制脚本 - Debug日志"
+SUBJECT="戴尔服务器风扇开机控制脚本 - 运行日志"
 BODY=$(cat $LOG_FILE)
 echo "$BODY" | mail -s "$SUBJECT" $EMAIL
 }
@@ -106,18 +101,18 @@ else
     echo "风扇转速设置为10%"
 fi
 
-# 检查FanControl.sh运行状态
+# 检查戴尔服务器风扇开机控制脚本运行状态
 echo "检查FanControl.sh运行状态"
 if [ $? -eq 0 ]; then
-    echo "FanControl.sh运行成功" >> $LOG_FILE
-    echo "FanControl.sh运行成功"
+    echo "戴尔服务器风扇开机控制脚本运行成功" >> $LOG_FILE
+    echo "戴尔服务器风扇开机控制脚本运行成功"
 else
-    echo "FanControl.sh运行失败" >> $LOG_FILE
-    echo "FanControl.sh运行失败"
+    echo "戴尔服务器风扇开机控制脚本运行失败" >> $LOG_FILE
+    echo "戴尔服务器风扇开机控制脚本运行失败"
 fi
 
 # 发送通知邮件
 echo "发送通知邮件"
 send_notification
 
-echo "戴尔风扇控制脚本运行完成"
+echo "戴尔服务器风扇开机控制脚本运行完成"

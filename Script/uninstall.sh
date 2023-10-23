@@ -16,16 +16,13 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #    
 #    AUKcl's email:kaixuan135@outloook.com
-# 
-#
+
+# 导入配置文件
+source /root/ipmitool/config/config.cfg
+
 # 恢复System Board Fans为自动调节
 restore_fans_to_auto() {
-    # 设置IPMI连接参数
-    read -p "请输入目标服务器IP地址: " IP
-    read -p "请输入IPMI用户名: " USERNAME
-    read -s -p "请输入IPMI密码: " PASSWORD
-    echo  # 换行以使输出更清晰
-    echo "恢复 System Board Fans 为自动调节"
+    echo "正在恢复System Board Fans为自动调节..."
     ipmitool -I lanplus -H $IP -U $USERNAME -P $PASSWORD raw 0x30 0x30 0x01 0x01
     echo "System Board Fans 已恢复为自动调节"
 }
@@ -48,14 +45,14 @@ uninstall_postfix() {
     sudo apt-get remove -y postfix
     sudo rm /etc/postfix/sasl_passwd
     sudo rm /etc/postfix/sasl_passwd.db
-    sudo rm -rf /etc/postfix
 }
 
-# 删除戴尔风扇控制脚本和相关文件
+# 删除戴尔服务器风扇控制脚本和相关文件
 remove_fans_control() {
-    echo "正在删除戴尔风扇控制脚本和相关文件..."
-    sudo update-rc.d -f FansControl.sh remove
-    sudo rm /etc/init.d/FansControl.sh
+    echo "从开机启动中删除 FansControl_Start.sh"
+    sudo update-rc.d -f FansControl_Start.sh remove
+    echo "删除 FansControl_Stability.sh 定时运行"
+    crontab -l | grep -v "/root/ipmitool/FansControl_Stability.sh" | crontab -
     sudo rm -rf /root/ipmitool/
 }
 
@@ -67,7 +64,7 @@ uninstall_script() {
     uninstall_postfix
     remove_fans_control
 
-    echo "卸载完成！戴尔风扇控制脚本和相关组件已被移除。"
+    echo "卸载完成！戴尔服务器风扇控制脚本和相关组件已被移除。"
 }
 
 # 执行一键卸载脚本
