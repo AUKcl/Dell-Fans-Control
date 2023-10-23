@@ -45,6 +45,8 @@ uninstall_postfix() {
     sudo apt-get remove -y postfix
     sudo rm /etc/postfix/sasl_passwd
     sudo rm /etc/postfix/sasl_passwd.db
+    sudo rm /etc/postfix/generic
+    sudo rm /etc/postfix/generic.db
 }
 
 # 删除戴尔服务器风扇控制脚本和相关文件
