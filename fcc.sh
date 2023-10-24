@@ -88,6 +88,18 @@ main_menu() {
 
 # 二级菜单选项
 update_ip() {
+    # 验证IP地址的格式
+    validate_ip() {
+        local ip="$1"
+        local regex="^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+        
+        if [[ $ip =~ $regex ]]; then
+            return 0  # IP地址格式正确
+        else
+            return 1  # IP地址格式错误
+        fi
+    }
+
     while true; do
         echo "1. 请输入新的目标服务器IP地址"
         echo "2. 返回上一级"
@@ -96,8 +108,13 @@ update_ip() {
         case $choice in
             1)
                 read -p "请输入新的目标服务器IP地址: " new_ip
-                sed -i "s/IP=.*/IP=$new_ip/" $CONFIG_FILE
-                echo "已更新目标服务器IP地址为: $new_ip"
+
+                if validate_ip "$new_ip"; then
+                    sed -i "s/IP=.*/IP=$new_ip/" $CONFIG_FILE
+                    echo "已更新目标服务器IP地址为: $new_ip"
+                else
+                    echo "错误：IP地址格式无效，请重新输入。"
+                fi
                 ;;
             2)
                 return
