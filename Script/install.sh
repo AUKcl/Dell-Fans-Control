@@ -110,7 +110,11 @@ download_fans_control_script() {
     echo "正在下载戴尔服务器风扇控制脚本..."
     try_catch sudo mkdir -p /root/ipmitool/
     try_catch sudo wget -q -O /root/ipmitool/FansControl_Start.sh https://github.com/AUKcl/Dell-Fans-Control/raw/main/Script/FansControl_Start.sh
+    try_catch sudo chmod +x /root/ipmitool/FansControl_Start.sh
     try_catch sudo wget -q -O /root/ipmitool/FansControl_Stability.sh https://github.com/AUKcl/Dell-Fans-Control/raw/main/Script/FansControl_Stability.sh
+    try_catch sudo chmod +x /root/ipmitool/FansControl_Stability.sh
+    try_catch sudo wget -q -O /root/ipmitool/fcc.sh https://github.com/AUKcl/Dell-Fans-Control/raw/main/fcc.sh
+    try_catch sudo chmod +x /root/ipmitool/fcc.sh
 }
 
 # 安装mailutils
