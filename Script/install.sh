@@ -24,6 +24,7 @@ RED="\e[31m"
 PLAIN="\e[0m"
 
 # 定义日志文件路径
+sudo mkdir -p /root/ipmitool/log
 LOG_FILE="/root/ipmitool/log/fans_control_install_$(date +"%Y%m%d_%H%M%S").log"
 
 # 函数：将消息记录到日志文件
