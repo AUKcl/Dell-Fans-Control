@@ -164,21 +164,21 @@ configure_postfix() {
     if ! grep -q "relayhost = " /etc/postfix/main.cf; then
         try_catch echo "relayhost = [$SMTP_SERVER]:$SMTP_PORT" | sudo tee -a /etc/postfix/main.cf > /dev/null
     else
-        try_catch sudo sed -i "s|#relayhost =.*|relayhost = [$SMTP_SERVER]:$SMTP_PORT|" /etc/postfix/main.cf
+        try_catch sudo sed -i "s|relayhost =.*|relayhost = [$SMTP_SERVER]:$SMTP_PORT|" /etc/postfix/main.cf
     fi
 
     # 5. 启用 smtp_sasl_auth_enable
     if ! grep -q "smtp_sasl_auth_enable = " /etc/postfix/main.cf; then
         try_catch echo "smtp_sasl_auth_enable = yes" | sudo tee -a /etc/postfix/main.cf > /dev/null
     else
-        try_catch sudo sed -i "s|#smtp_sasl_auth_enable =.*|smtp_sasl_auth_enable = yes|" /etc/postfix/main.cf
+        try_catch sudo sed -i "s|smtp_sasl_auth_enable =.*|smtp_sasl_auth_enable = yes|" /etc/postfix/main.cf
     fi
 
     # 6. 设置 smtp_sasl_password_maps
     if ! grep -q "smtp_sasl_password_maps = " /etc/postfix/main.cf; then
         try_catch echo "smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd" | sudo tee -a /etc/postfix/main.cf > /dev/null
     else
-        try_catch sudo sed -i "s|#smtp_sasl_password_maps =.*|smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd|" /etc/postfix/main.cf
+        try_catch sudo sed -i "s|smtp_sasl_password_maps =.*|smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd|" /etc/postfix/main.cf
     fi
 
     # 7. 设置 smtp_generic_maps
@@ -192,7 +192,7 @@ configure_postfix() {
     if ! grep -q "smtp_sasl_security_options = " /etc/postfix/main.cf; then
         try_catch echo "smtp_sasl_security_options = noanonymous" | sudo tee -a /etc/postfix/main.cf > /dev/null
     else
-        try_catch sudo sed -i "s|#smtp_sasl_security_options =.*|smtp_sasl_security_options = noanonymous|" /etc/postfix/main.cf
+        try_catch sudo sed -i "s|smtp_sasl_security_options =.*|smtp_sasl_security_options = noanonymous|" /etc/postfix/main.cf
     fi
 
     # 9. 设置 sasl_passwd
