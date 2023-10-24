@@ -20,6 +20,11 @@ sudo mkdir -p /root/ipmitool/ && wget https://github.com/AUKcl/Dell-Fans-Control
 sudo wget https://github.com/AUKcl/Dell-Fans-Control/raw/main/Script/uninstall.sh -P /root/ipmitool/ && chmod +x /root/ipmitool/uninstall.sh && bash /root/ipmitool/uninstall.sh
 ```
 
+## 修改配置
+复制下列命令，执行修改配置脚本
+```bash
+sudo bash /root/ipmitool/fcc.sh
+```
 ## 测试
 
 测试邮件设置
@@ -37,6 +42,8 @@ cat /var/log/mail.log
 脚本默认地址：`/root/ipmitool/`
 
 FansControl日志地址：`/root/ipmitool/log`
+
+脚本配置文件地址：`/root/ipmitool/config`
 
 ## 许可证
 GPLv3 © [AUKcl](LICENSE)
