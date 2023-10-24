@@ -88,6 +88,25 @@ echo "$BODY" | mail -s "$SUBJECT" $EMAIL
 
 log_and_output "戴尔服务器风扇控制脚本运行中..." 
 
+# 检查是否支持 IPMI
+log_and_output "检查是否支持 IPMI"
+ipmi_support=$(timeout $TIMEOUT ipmitool -I lanplus -H $IP -U $USERNAME -P $PASSWORD mc info 2>/dev/null)
+
+# 判断IPMI是否超时
+if [ $? -eq 124 ]; then
+    log_and_output "获取 IPMI 信息超时"
+    exit 1
+fi
+
+log_and_output "IPMI 信息:
+$ipmi_support"
+
+# 检查ipmitool的退出状态
+if [ -z "$ipmi_support" ]; then
+    log_and_output "Error: 无法建立 IPMI 会话，检查是否支持 IPMI 或配置文件是否正确。"
+    exit 1
+fi
+
 # 开/关 风扇自动调节，当最后一个16进制数为0x00时为关闭，0x01时为开启
 log_and_output "关闭风扇自动调节"
 ipmitool -I lanplus -H $IP -U $USERNAME -P $PASSWORD raw 0x30 0x30 0x01 0x00
@@ -117,7 +136,7 @@ $sensor_output"
 
 # 解析传感器温度值
 log_and_output "解析传感器温度值"
-temperature1=$(echo "$sensor_output" | grep "Temp" | awk 'NR==3 {print $(NF-2)}' | cut-d ' ' -f 1)
+temperature1=$(echo "$sensor_output" | grep "Temp" | awk 'NR==3 {print $(NF-2)}' | cut -d ' ' -f 1)
 temperature2=$(echo "$sensor_output" | grep "Temp" | awk 'NR==4 {print $(NF-2)}' | cut -d ' ' -f 1)
 log_and_output "CPU1: $temperature1 摄氏度"
 log_and_output "CPU2: $temperature2 摄氏度"
