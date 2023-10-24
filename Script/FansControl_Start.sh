@@ -19,8 +19,12 @@
 #    
 #    AUKcl's email:kaixuan135@outloook.com
 
-# 导入配置文件
-source /root/ipmitool/config/config.cfg
+# 发送运行失败通知邮件函数
+send_failure_notification() {
+SUBJECT="戴尔服务器风扇开机控温脚本 - 运行失败，请检查服务器状态"
+BODY=$(cat $LOG_FILE)
+echo "$BODY" | mail -s "$SUBJECT" $EMAIL
+}
 
 # 获取当前时间的年月日、时分秒格式
 CURRENT_TIME=$(date +"%Y%m%d_%H%M%S")
@@ -32,19 +36,58 @@ LOG_DIR="/root/ipmitool/log"
 mkdir -p $LOG_DIR
 
 # 设置日志文件路径，包括当前时间后缀
-LOG_FILE="$LOG_DIR/logfile_$CURRENT_TIME.log"
+LOG_FILE="$LOG_DIR/FansControl_Start_log_$CURRENT_TIME.log"
+
+# 检查日志文件是否被成功设置
+if [ -z "$LOG_FILE" ]; then
+    echo "错误：无法设置日志文件路径"
+    echo "错误：无法设置日志文件路径" >> $LOG_FILE
+    send_failure_notification
+    exit 1
+fi
 
 # 开启日志
 exec > >(tee -a $LOG_FILE) 2>&1
 
-echo "戴尔服务器风扇控制脚本运行中..." 
+# 检查 exec 命令是否成功
+if [ $? -ne 0 ]; then
+    echo "错误：无法开启日志"
+    echo "错误：无法开启日志" >> $LOG_FILE
+    send_failure_notification
+    exit 1
+fi
+
+# 设置退出时执行的清理操作
+cleanup() {
+    if [ $? -ne 0 ]; then
+        echo "戴尔服务器风扇开机控温脚本运行失败" >> $LOG_FILE
+        echo "戴尔服务器风扇开机控温脚本运行失败"
+        send_failure_notification
+    fi
+}
+
+# 注册退出时的清理操作
+trap cleanup EXIT
+
+# 导入配置文件
+source /root/ipmitool/config/config.cfg
+
+# 检查IP是否可访问
+if ! ping -c 1 -w 2 $IP > /dev/null; then
+    echo "无法访问服务器IP地址: $IP"
+    echo "无法访问服务器IP地址: $IP" >> $LOG_FILE
+    send_failure_notification
+    exit 1
+fi
 
 # 发送通知邮件函数
 send_notification() {
-SUBJECT="戴尔服务器风扇开机控制脚本 - 运行日志"
+SUBJECT="戴尔服务器风扇开机控温脚本 - 运行成功"
 BODY=$(cat $LOG_FILE)
 echo "$BODY" | mail -s "$SUBJECT" $EMAIL
 }
+
+echo "戴尔服务器风扇控制脚本运行中..." 
 
 # 开/关 风扇自动调节，当最后一个16进制数为0x00时为关闭，0x01时为开启
 echo "关闭风扇自动调节"
