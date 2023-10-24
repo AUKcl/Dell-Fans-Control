@@ -37,6 +37,7 @@ log_message() {
 # 函数：捕获异常并记录到日志
 try_catch() {
     if `"$@"`; then
+        log_message "Command '$*' executed successfully."
         return 0
     else
         local exit_code=$?
