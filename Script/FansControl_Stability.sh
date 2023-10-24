@@ -21,9 +21,15 @@
 
 # 发送运行失败通知邮件函数
 send_failure_notification() {
-SUBJECT="戴尔服务器风扇定时控温脚本 - 运行失败，请检查服务器状态"
-BODY=$(cat $LOG_FILE)
-echo "$BODY" | mail -s "$SUBJECT" $EMAIL
+    SUBJECT="戴尔服务器风扇定时控温脚本 - 运行失败，请检查服务器状态"
+    BODY=$(cat $LOG_FILE)
+    echo "$BODY" | mail -s "$SUBJECT" $EMAIL
+}
+
+# 输出信息到日志文件和标准输出
+log_and_output() {
+    local message="$1"
+    echo "$message"
 }
 
 # 获取当前时间的年月日、时分秒格式
@@ -40,9 +46,7 @@ LOG_FILE="$LOG_DIR/FansControl_Stability_log_$CURRENT_TIME.log"
 
 # 检查日志文件是否被成功设置
 if [ -z "$LOG_FILE" ]; then
-    echo "错误：无法设置日志文件路径"
-    echo "错误：无法设置日志文件路径" >> $LOG_FILE
-    send_failure_notification
+    log_and_output "错误：无法设置日志文件路径"
     exit 1
 fi
 
@@ -51,17 +55,14 @@ exec > >(tee -a $LOG_FILE) 2>&1
 
 # 检查 exec 命令是否成功
 if [ $? -ne 0 ]; then
-    echo "错误：无法开启日志"
-    echo "错误：无法开启日志" >> $LOG_FILE
-    send_failure_notification
+    log_and_output "错误：无法开启日志"
     exit 1
 fi
 
 # 设置退出时执行的清理操作
 cleanup() {
     if [ $? -ne 0 ]; then
-        echo "戴尔服务器风扇定时控温脚本运行失败" >> $LOG_FILE
-        echo "戴尔服务器风扇定时控温脚本运行失败"
+        log_and_output "戴尔服务器风扇定时控温脚本运行失败"
         send_failure_notification
     fi
 }
@@ -74,63 +75,70 @@ source /root/ipmitool/config/config.cfg
 
 # 检查IP是否可访问
 if ! ping -c 1 -w 2 $IP > /dev/null; then
-    echo "无法访问服务器IP地址: $IP"
-    echo "无法访问服务器IP地址: $IP" >> $LOG_FILE
-    send_failure_notification
+    log_and_output "无法访问服务器IP地址: $IP"
     exit 1
 fi
 
-echo "戴尔服务器风扇定时控温脚本运行中..." 
+log_and_output "戴尔服务器风扇定时控温脚本运行中..."
 
-# 获取传感器温度并设置超时
-echo "获取传感器温度"
-sensor_output=$(timeout $TIMEOUT ipmitool -I lanplus -H $IP -U $USERNAME -P $PASSWORD sdr type temperature)
+# 检查是否支持 IPMI
+log_and_output "检查是否支持 IPMI"
+ipmi_support=$(timeout $TIMEOUT ipmitool -I lanplus -H $IP -U $USERNAME -P $PASSWORD mc info 2>/dev/null)
 
-# 判断是否超时
+# 判断IPMI是否超时
 if [ $? -eq 124 ]; then
-    echo "获取传感器温度超时"
-    echo "获取传感器温度超时" >> $LOG_FILE
-    send_failure_notification
+    log_and_output "获取 IPMI 信息超时"
     exit 1
 fi
+
+log_and_output "IPMI 信息:
+$ipmi_support"
 
 # 检查ipmitool的退出状态
-if [ $? -ne 0 ]; then
-    echo "ipmitool命令执行失败，无法建立IPMI会话，检查ipmitool是否正常运行或配置文件是否正确"
-    echo "ipmitool命令执行失败，无法建立IPMI会话，检查ipmitool是否正常运行或配置文件是否正确" >> $LOG_FILE
-    send_failure_notification
+if [ -z "$ipmi_support" ]; then
+    log_and_output "Error: 无法建立 IPMI 会话，检查是否支持 IPMI 或配置文件是否正确。"
     exit 1
 fi
 
-echo "传感器温度结果: 
+# 获取传感器温度并设置超时
+log_and_output "获取传感器温度"
+sensor_output=$(timeout $TIMEOUT ipmitool -I lanplus -H $IP -U $USERNAME -P $PASSWORD sdr type temperature)
+
+# 判断获取传感器温度是否超时
+if [ $? -eq 124 ]; then
+    log_and_output "获取传感器温度超时"
+    exit 1
+fi
+
+log_and_output "传感器温度结果:
 $sensor_output"
 
 # 解析传感器温度值
-echo "解析传感器温度值"
+log_and_output "解析传感器温度值"
 temperature1=$(echo "$sensor_output" | grep "Temp" | awk 'NR==3 {print $(NF-2)}' | cut -d ' ' -f 1)
 temperature2=$(echo "$sensor_output" | grep "Temp" | awk 'NR==4 {print $(NF-2)}' | cut -d ' ' -f 1)
-echo "CPU1: $temperature1 摄氏度"
-echo "CPU2: $temperature2 摄氏度"
+log_and_output "CPU1: $temperature1 摄氏度"
+log_and_output "CPU2: $temperature2 摄氏度"
 
 # 计算温度平均值
-echo "计算温度平均值"
+log_and_output "计算温度平均值"
 average_temperature=$(( (temperature1 + temperature2) / 2 ))
-echo "CPU平均温度: $average_temperature"
+log_and_output "CPU平均温度: $average_temperature"
 
 # 根据传感器温度调整风扇转速
-echo "根据传感器温度调整风扇转速"
+log_and_output "根据传感器温度调整风扇转速"
 if [ $average_temperature -ge 55 ]; then
     # 将风扇转速设置为20%
     ipmitool -I lanplus -H $IP -U $USERNAME -P $PASSWORD raw 0x30 0x30 0x02 0xff 0x14
-    echo "风扇转速设置为20%"
+    log_and_output "风扇转速设置为20%"
 elif [ $average_temperature -ge 47 ]; then
     # 将风扇转速设置为15%
     ipmitool -I lanplus -H $IP -U $USERNAME -P $PASSWORD raw 0x30 0x30 0x02 0xff 0x0f
-    echo "风扇转速设置为15%"
+    log_and_output "风扇转速设置为15%"
 else
     # 将风扇转速设置为10%
     ipmitool -I lanplus -H $IP -U $USERNAME -P $PASSWORD raw 0x30 0x30 0x02 0xff 0x0a
-    echo "风扇转速设置为10%"
+    log_and_output "风扇转速设置为10%"
 fi
 
-echo "戴尔服务器风扇定时控温脚本运行完成"
+log_and_output "戴尔服务器风扇定时控温脚本运行完成"
