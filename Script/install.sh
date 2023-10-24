@@ -221,12 +221,12 @@ add_to_startup() {
 
 # 一键安装脚本逻辑顺序
 install_script() {
+    download_fans_control_script
     ask_ipmi_params
     ask_email_address
     ask_smtp_details
     set_timeout
     generate_cfg_config_file
-    download_fans_control_script
     install_mailutils
     install_ipmitool
     install_postfix
