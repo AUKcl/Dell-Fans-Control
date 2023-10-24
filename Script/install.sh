@@ -88,6 +88,7 @@ set_timeout() {
 
 # 函数生成CFG配置文件
 generate_cfg_config_file() {
+    try_catch sudo mkdir -p /root/ipmitool/config
     try_catch cat > /root/ipmitool/config/config.cfg <<EOF
 # 配置文件
 IP=$IP
