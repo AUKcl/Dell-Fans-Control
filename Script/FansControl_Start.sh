@@ -163,7 +163,7 @@ else
 fi
 
 # 检查戴尔服务器风扇开机控制脚本运行状态
-log_and_output "检查FanControl.sh运行状态"
+log_and_output "检查戴尔服务器风扇开机控制脚本运行状态"
 if [ $? -eq 0 ]; then
     log_and_output "戴尔服务器风扇开机控制脚本运行成功"
     send_notification
