@@ -37,6 +37,16 @@ echo "test" | mail -s "hello" your_email@outlook.com
 cat /var/log/mail.log 
 ```
 
+试运行定时控温脚本
+```bash
+bash /root/ipmitool/FansControl_Stability.sh
+```
+
+试运行开机控温脚本
+```bash
+bash /root/ipmitool/FansControl_Start.sh
+```
+
 ## 脚本目录
 
 脚本默认地址：`/root/ipmitool/`
