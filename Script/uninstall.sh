@@ -1,5 +1,5 @@
-#    AutoBangumi-OneClickScrip
-#    One-click deployment of the ipmitool on Linux, and automatic control of Dell server fan speed, with email notification of the execution result.
+#    Dell-Fans-Control
+#    One-click deployment of the ipmitool tool on Linux, and automatic control of the fan speed on Dell servers, with email notifications of the execution results.
 #    Copyright (C) <2023>  <AUKcl>
 #
 #    This program is free software: you can redistribute it and/or modify
